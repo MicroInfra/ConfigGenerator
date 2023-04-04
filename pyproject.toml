@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "configgenerator"
+version = "0.1.0"
+description = ""
+authors = ["Mark Nicholson <justmark0>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+grafanalib = "^0.7.0"
+fastapi = "^0.95.0"
+uvicorn = "^0.21.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.black]
+line-length = 79
+include = '.pyi?$'
+exclude = '''
+/(
+    .git
+    | .hg
+    | .mypy_cache
+    | .tox
+    | .venv
+    | _build
+    | buck-out
+    | build
+    | dist
+)/
+'''
