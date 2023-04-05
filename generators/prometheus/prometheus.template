@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 1m
+  scrape_timeout: 10s
+{% if exporters|length > 0 %}
+scrape_configs:
+{% for exporter in exporters %}
+- job_name: {{exporter.name}}
+  static_configs:
+  - targets:
+    - {{exporter.host_port}}
+  metrics_path: {{exporter.metrics_path}} {% if exporter.params|length > 0 %}
+  params: {% for param, value in exporter.params.items() %}
+      {{param}}: {{value}} {% endfor %}
+{% endif %}{% endfor %}{% endif %}
+rule_files:
+  - /etc/prometheus/rules/*.rules.yml

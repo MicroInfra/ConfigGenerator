@@ -1,0 +1,9 @@
+.gitignore
+.git
+.github
+.isort.cfg
+.pre-commit-config.yaml
+Dockerfile
+.dockerignore
+docker-compose.yml
+README.md

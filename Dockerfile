@@ -1,11 +1,12 @@
 FROM python:3.11
 
 WORKDIR /app
+ENV PYTHONUNBUFFERED 1
+RUN pip install --upgrade pip poetry==1.4.2 && poetry config virtualenvs.create false
 
-COPY ./requirements.txt /code/requirements.txt
+COPY pyproject.toml .
+COPY poetry.lock .
+RUN poetry install --no-dev
+COPY . .
 
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
-
-COPY ./app /code/app
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]

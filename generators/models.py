@@ -1,46 +1,52 @@
-import dataclasses
 import typing as tp
 
 from pydantic import BaseModel, Field
 
 
-@dataclasses.dataclass
-class GrafanaSettings:
+class GrafanaSettings(BaseModel):
     username: str
     password: str
 
 
-@dataclasses.dataclass
-class PrometheusSettings:
+class Exporter(BaseModel):
+    name: str
+    host_port: str
+    metrics_path: str = "/metrics"
+    params: dict | None = None
+
+
+class PrometheusSettings(BaseModel):
+    username: str
+    password: str
+    exporters: tp.List[Exporter]
+
+
+class ProxyManagerSettings(BaseModel):
     username: str
     password: str
 
 
-@dataclasses.dataclass
-class ProxyManagerSettings:
-    username: str
-    password: str
-
-
-@dataclasses.dataclass
-class RequestGrafanaSettings:
+class RequestGrafanaSettings(BaseModel):
     username: str | None = None
     password: str | None = None
 
 
-@dataclasses.dataclass
-class RequestPrometheusSettings:
+class RequestPrometheusSettings(BaseModel):
+    username: str | None = None
+    password: str | None = None
+    exporters: tp.List[Exporter] | None = None
+
+
+class RequestProxyManagerSettings(BaseModel):
     username: str | None = None
     password: str | None = None
 
 
-@dataclasses.dataclass
-class RequestProxyManagerSettings:
-    username: str | None = None
-    password: str | None = None
+class Service(BaseModel):
+    name: str
+    url: str
 
 
-@dataclasses.dataclass
 class RequestConfig(BaseModel):
     grafana: RequestGrafanaSettings | None = None
     prometheus: RequestPrometheusSettings | None = None
@@ -52,15 +58,8 @@ class RequestConfig(BaseModel):
     )
 
 
-class Item(BaseModel):
-    name: str = Field(example="Foo")
-    description: str | None = Field(default=None, example="A very nice Item")
-    price: float = Field(example=35.4)
-    tax: float | None = Field(default=None, example=3.2)
-
-
-@dataclasses.dataclass
 class Config(BaseModel):
+    id: str
     grafana: GrafanaSettings
     prometheus: PrometheusSettings
     proxy_manager: ProxyManagerSettings
