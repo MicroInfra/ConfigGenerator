@@ -20,11 +20,13 @@ def get_path(relative_path: str):
 
 
 def get_content(relative_path: str):
-    with open(get_path("prometheus/prometheus.template"), "r") as file:
+    with open(get_path(relative_path), "r") as file:
         return file.read()
 
 
-def save_config_file(id: str, relative_path: str, content: str):
+def save_config_file(
+    id: str, relative_path: str, content: str, permissions=0o666
+):
     path = TMP_FILES_DIR + id + "/" + relative_path
     output_file = Path(path)
     output_file.parent.mkdir(
@@ -32,3 +34,10 @@ def save_config_file(id: str, relative_path: str, content: str):
         parents=True,
     )
     output_file.write_text(content)
+    os.chmod(path, permissions)
+
+
+def mkdir(id: str, relative_folder_path: str, permissions=0o666):
+    path = TMP_FILES_DIR + id + "/" + relative_folder_path
+    os.mkdir(path)
+    os.chmod(path, permissions)

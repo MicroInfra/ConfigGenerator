@@ -4,8 +4,7 @@ services:
   prometheus:
     image: prom/prometheus
     volumes:
-      - ./prometheus-configs/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./prometheus-configs:/etc/prometheus/alerts
+      - ./prometheus:/etc/prometheus
     ports:
       - "9090:9090"
 
@@ -14,8 +13,8 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - grafana-data:/var/lib/grafana
-      - ./custom.ini:/etc/grafana/grafana.ini
+      - ./grafana-data:/var/lib/grafana
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
     depends_on:
       - prometheus
 

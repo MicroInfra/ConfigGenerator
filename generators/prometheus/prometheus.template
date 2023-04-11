@@ -13,4 +13,4 @@ scrape_configs:
       {{param}}: {{value}} {% endfor %}
 {% endif %}{% endfor %}{% endif %}
 rule_files:
-  - /etc/prometheus/rules/*.rules.yml
+  - /etc/prometheus/*.rules.yml

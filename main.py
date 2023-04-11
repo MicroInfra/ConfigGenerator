@@ -19,6 +19,16 @@ async def root_get():
     return RedirectResponse("/docs")
 
 
+def get_field(request, fields: str):
+    obj = request
+    for field in fields.split("."):
+        try:
+            obj = getattr(obj, field)
+        except AttributeError:
+            return None
+    return obj
+
+
 @app.post("/")
 async def create_config(
     request: models.RequestConfig | None = None,
@@ -28,20 +38,25 @@ async def create_config(
     config = models.Config(
         id=uuid.uuid4().hex,
         grafana=models.GrafanaSettings(
-            username=request.grafana.username or "admin",
-            password=request.grafana.password or new_password(),
+            username=get_field(request, "grafana.username") or "admin",
+            password=get_field(request, "grafana.password") or new_password(),
         ),
         prometheus=models.PrometheusSettings(
-            username=request.grafana.username or "admin",
-            password=request.grafana.password or new_password(),
-            exporters=request.prometheus.exporters or [],
+            username=get_field(request, "prometheus.username") or "admin",
+            password=get_field(request, "prometheus.password")
+            or new_password(),
+            exporters=get_field(request, "prometheus.password") or [],
         ),
         proxy_manager=models.ProxyManagerSettings(
-            username=request.grafana.username or "admin",
-            password=request.grafana.password or new_password(),
+            username=get_field(request, "proxy_manager.username") or "admin",
+            password=get_field(request, "proxy_manager.password")
+            or new_password(),
         ),
-        services=request.services or list(),
-        enable_nginx_reverse_proxy=request.enable_nginx_reverse_proxy,
+        services=get_field(request, "enable_nginx_reverse_proxy") or list(),
+        enable_nginx_reverse_proxy=get_field(
+            request, "enable_nginx_reverse_proxy"
+        )
+        or False,
     )
     generate_all(config=config)
 
