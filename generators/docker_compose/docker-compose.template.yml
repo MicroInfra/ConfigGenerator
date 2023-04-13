@@ -15,6 +15,7 @@ services:
     volumes:
       - ./grafana-data:/var/lib/grafana
       - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./grafana/prometheus.yaml:/etc/grafana/provisioning/datasources/prometheus.yaml
     depends_on:
       - prometheus
 

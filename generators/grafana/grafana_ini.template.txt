@@ -1,0 +1,42 @@
+[paths]
+# Define the data and log paths for Grafana
+data = /var/lib/grafana
+logs = /var/log/grafana
+plugins = /var/lib/grafana/plugins
+provisioning = /etc/grafana/provisioning
+
+[server]
+# The Grafana server settings
+http_addr = 0.0.0.0
+http_port = 3000
+domain = localhost
+
+[database]
+# Database configuration for Grafana
+type = sqlite3
+path = grafana.db
+
+[security]
+# Set the password for the admin user
+admin_user = {{username}}
+admin_password = {{password}}
+
+[users]
+# User configuration settings
+allow_sign_up = false
+auto_assign_org = true
+auto_assign_org_role = Viewer
+
+[auth.anonymous]
+# Anonymous access configuration
+enabled = false
+
+[datasources]
+# Prometheus data source configuration
+[[datasources]]
+type = prometheus
+name = Prometheus
+url = {{prometheus_url}}
+access = proxy
+basic_auth = false
+is_default = true

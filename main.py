@@ -1,3 +1,4 @@
+import asyncio
 import secrets
 import uuid
 
@@ -31,10 +32,10 @@ def get_field(request, fields: str):
 
 @app.post("/")
 async def create_config(
-    request: models.RequestConfig | None = None,
+    request: models.RequestConfig | None = None, debug: bool = False
 ) -> models.Config:
     utils.clean()
-    print(request)
+    print("Request is:", request)
     config = models.Config(
         id=uuid.uuid4().hex,
         grafana=models.GrafanaSettings(
@@ -59,9 +60,18 @@ async def create_config(
         or False,
     )
     generate_all(config=config)
+    if debug:
+        print("GENERATED CONFIG:\n", config)
 
     return config
 
 
+def test():
+    loop = asyncio.get_event_loop()
+    coroutine = create_config(debug=True)
+    loop.run_until_complete(coroutine)
+
+
 if __name__ == "__main__":
+    # test()
     uvicorn.run(app, host="0.0.0.0", port=8080)
