@@ -1,5 +1,6 @@
 import asyncio
 import secrets
+import string
 import uuid
 
 import uvicorn
@@ -11,8 +12,9 @@ from generators import generate_all, models, utils
 app = FastAPI()
 
 
-def new_password(length: int = 10):
-    return secrets.token_urlsafe(length)
+def new_password(length: int = 18):
+    alphabet = string.ascii_letters + string.digits + "_"
+    return "".join(secrets.choice(alphabet) for _ in range(length))
 
 
 @app.get("/")
@@ -33,9 +35,13 @@ def get_field(request, fields: str):
 @app.post("/")
 async def create_config(
     request: models.RequestConfig | None = None, debug: bool = False
-) -> models.Config:
+) -> models.Response:
     utils.clean()
     print("Request is:", request)
+    exporters: list = get_field(request, "prometheus.exporters") or []
+    exporters.append(
+        models.Exporter(name="microexporter", host_port="exporter:60123")
+    )
     config = models.Config(
         id=uuid.uuid4().hex,
         grafana=models.GrafanaSettings(
@@ -46,14 +52,23 @@ async def create_config(
             username=get_field(request, "prometheus.username") or "admin",
             password=get_field(request, "prometheus.password")
             or new_password(),
-            exporters=get_field(request, "prometheus.password") or [],
+            exporters=exporters,
         ),
         proxy_manager=models.ProxyManagerSettings(
             username=get_field(request, "proxy_manager.username") or "admin",
             password=get_field(request, "proxy_manager.password")
             or new_password(),
         ),
-        services=get_field(request, "enable_nginx_reverse_proxy") or list(),
+        microinfra_exporter=models.MicroinfraExporterSettings(
+            auth_token=new_password(20)
+        ),
+        services=[
+            models.Service(
+                name="kolorz",
+                url="http://host.docker.internal:8099/",
+                listen_port=8123,
+            )
+        ],  # get_field(request, "services") or list(),
         enable_nginx_reverse_proxy=get_field(
             request, "enable_nginx_reverse_proxy"
         )
@@ -62,8 +77,7 @@ async def create_config(
     generate_all(config=config)
     if debug:
         print("GENERATED CONFIG:\n", config)
-
-    return config
+    return models.Response(config=config, formatted_config=str(config))
 
 
 def test():
@@ -73,5 +87,5 @@ def test():
 
 
 if __name__ == "__main__":
-    # test()
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    test()
+    # uvicorn.run(app, host="0.0.0.0", port=8080)

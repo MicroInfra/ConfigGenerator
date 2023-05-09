@@ -15,6 +15,8 @@ services:
     volumes:
       - ./grafana-data:/var/lib/grafana
       - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./grafana/dashboards/:/etc/grafana/provisioning/dashboards/
+      - ./grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
       - ./grafana/prometheus.yaml:/etc/grafana/provisioning/datasources/prometheus.yaml
     depends_on:
       - prometheus
@@ -22,11 +24,24 @@ services:
   proxy-manager:
     image: justmark0/proxymanager:latest
     network_mode: "host"
+    volumes:
+      - ./proxy_manager/settings.json:/app/settings.json
+    environment:
+      CHECK_AUTH: false
 
   proxymanager-front:
     image: justmark0/proxymanager-front:latest
     ports:
       - "80:3000"
+    depends_on:
+      - proxy-manager
+
+  exporter:
+    image: justmark0/microexporter:latest
+    ports:
+      - "60123:60123"
+    environment:
+      AUTH_TOKEN: {{exporter_auth_token}}
 
 volumes:
   grafana-data:

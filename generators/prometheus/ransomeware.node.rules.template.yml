@@ -2,7 +2,7 @@ groups:
 - name: Encryption-Attack-Detection
   rules:
   - alert: HighDiskUsage
-    expr: 100 * (wmi_logical_disk_size_bytes{fstype="NTFS"} - wmi_logical_disk_free_bytes{fstype="NTFS"}) / wmi_logical_disk_size_bytes{fstype="NTFS"} > 80
+    expr: 100 * (node_filesystem_size_bytes{fstype="ext4"} - node_filesystem_free_bytes{fstype="ext4"}) / node_filesystem_size_bytes{fstype="ext4"} > 80
     for: 5m
     labels:
       severity: warning
@@ -11,7 +11,7 @@ groups:
       description: The disk usage on {{ $labels.instance }} has been above 80% for the past 5 minutes. This may indicate a ransomware attack.
 
   - alert: HighWriteIOPS
-    expr: rate(wmi_logical_disk_write_seconds_total[5m]) > 5
+    expr: rate(node_disk_write_time_seconds_total[5m]) > 5
     for: 2m
     labels:
       severity: critical
@@ -20,7 +20,7 @@ groups:
       description: The number of write IOPS on {{ $labels.instance }} has been above 5 per second for the past 2 minutes. This may indicate ransomware activity.
 
   - alert: HighDiskWriteUsage
-    expr: (wmi_logical_disk_write_bytes_total{job="wmi_exporter"} - wmi_logical_disk_write_bytes_total{job="wmi_exporter"} offset 5m) / 300 > 1000
+    expr: (node_disk_write_bytes_total{job="node"} - node_disk_write_bytes_total{job="node"} offset 5m) / 300 > 1000
     for: 5m
     labels:
       severity: critical
@@ -29,7 +29,7 @@ groups:
       description: High disk write usage detected on {{ $labels.instance }}. This could be a sign of an encryption attack.
 
   - alert: DiskReadWriteRateAnomaly
-    expr: rate(wmi_logical_disk_read_operations_total[5m]) + rate(wmi_logical_disk_write_operations_total[5m]) > 1000
+    expr: rate(node_disk_reads_completed_total[5m]) + rate(node_disk_writes_completed_total[5m]) > 1000
     for: 2m
     labels:
       severity: warning
@@ -38,7 +38,7 @@ groups:
       description: 'Unusual disk read/write rate on {{ $labels.instance }}'
 
   - alert: HostUnusualDiskReadRate
-    expr: sum by (instance) (rate(wmi_logical_disk_read_bytes_total[2m])) / 1024 / 1024 > 50
+    expr: sum by (instance) (rate(node_disk_read_bytes_total[2m])) / 1024 / 1024 > 50
     for: 5m
     labels:
       severity: warning
@@ -47,7 +47,7 @@ groups:
       description: "Disk is probably reading too much data (> 50 MB/s)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
   - alert: HostUnusualDiskWriteRate
-    expr: sum by (instance) (rate(wmi_logical_disk_written_bytes_total[2m])) / 1024 / 1024 > 50
+    expr: sum by (instance) (rate(node_disk_written_bytes_total[2m])) / 1024 / 1024 > 50
     for: 2m
     labels:
       severity: warning
@@ -55,8 +55,8 @@ groups:
       summary: Host unusual disk write rate (instance {{ $labels.instance }})
       description: "Disk is probably writing too much data (> 50 MB/s)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
-  - alert: DiskInodesUnusualCreation
-    expr: increase(wmi_logical_disk_written_bytes_total[1m]) > 1000
+  - alert: DiskInodesUnusialCreation
+    expr: increase(node_disk_written_bytes_total[1m]) > 1000
     for: 5m
     labels:
       severity: warning
@@ -64,8 +64,26 @@ groups:
       summary: "Disk write spike detected"
       description: "Disk write rate on instance {{ $labels.instance }} has spiked to over 1000 bytes per second in the last 1 minute"
 
+  - alert: FileExtensionChanged
+    expr: changes(file_extension_changed[1m]) > 0
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "File extensions within folder have changed"
+      description: "File extensions within the folder have changed in the last 1 minute on instance {{ $labels.instance }}"
+
+  - alert: FileModificationTimeChanged
+    expr: changes(file_modification_time_changed[1m]) > 0
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "File modification time has changed"
+      description: "Modification time of the file has changed in the last 1 minute on instance {{ $labels.instance }}"
+
   - alert: NewProcessCreated
-    expr: count(wmi_process_start_time_seconds) by (process_name) > count(wmi_process_start_time_seconds offset 1m) by (process_name)
+    expr: count(process_open_fds) by (process_name) > count(process_open_fds offset 1m) by (process_name)
     for: 5m
     labels:
       severity: warning
@@ -74,7 +92,7 @@ groups:
       description: A new process has been created on {{ $labels.instance }} in the past 5 minutes. This may indicate the presence of ransomware.
 
   - alert: HighCPUUsage
-    expr: 100 * (rate(wmi_cpu_time_seconds_total{mode="user"}[5m]) + rate(wmi_cpu_time_seconds_total{mode="privileged"}[5m])) / count(wmi_cpu_time_seconds_total{mode="privileged"}) > 90
+    expr: 100 * (rate(node_cpu_seconds_total{mode="user"}[5m]) + rate(node_cpu_seconds_total{mode="system"}[5m])) / count(node_cpu_seconds_total{mode="system"}) > 90
     for: 1m
     labels:
         severity: critical
