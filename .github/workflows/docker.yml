@@ -38,3 +38,23 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/configenerator:latest
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/configenerator:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/configenerator:buildcache,mode=max
+
+  build:
+    runs-on: [self-hosted, linux, x64]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build and start docker image
+        uses: actions/checkout@v2
+
+      - name: Stop previous containers
+        run: docker-compose -p microinfra_generator_backend stop
+
+      - name: Remove old container
+        run: docker-compose -p microinfra_generator_backend rm -f
+
+      - name: Build containers
+        run: docker build -t microinfra_generator_backend_nginx -f .deploy/nginx/Dockerfile .  &&
+          docker tag microinfra_generator_backend_nginx microinfra_generator_backend_nginx:latest
+
+      - name: Run service
+        run: docker-compose -f docker-compose.yml -p microinfra_backend up -d

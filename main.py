@@ -40,7 +40,7 @@ async def create_config(
     print("Request is:", request)
     exporters: list = get_field(request, "prometheus.exporters") or []
     exporters.append(
-        models.Exporter(name="microexporter", host_port="exporter:60123")
+        models.Exporter(name="windows", host_port="10.240.19.231:8080")
     )
     config = models.Config(
         id=uuid.uuid4().hex,
@@ -60,15 +60,9 @@ async def create_config(
             or new_password(),
         ),
         microinfra_exporter=models.MicroinfraExporterSettings(
-            auth_token=new_password(20)
+            auth_token=new_password()
         ),
-        services=[
-            models.Service(
-                name="kolorz",
-                url="http://host.docker.internal:8099/",
-                listen_port=8123,
-            )
-        ],  # get_field(request, "services") or list(),
+        services=get_field(request, "services") or list(),
         enable_nginx_reverse_proxy=get_field(
             request, "enable_nginx_reverse_proxy"
         )
@@ -87,5 +81,5 @@ def test():
 
 
 if __name__ == "__main__":
-    test()
-    # uvicorn.run(app, host="0.0.0.0", port=8080)
+    # test()
+    uvicorn.run(app, host="0.0.0.0", port=8085)

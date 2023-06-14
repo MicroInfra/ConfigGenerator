@@ -1,7 +1,28 @@
 version: '3.8'
 
 services:
-  proxy-manager:
-    build: .
+  nginx_microinfra_generator_backend:
+    image: microinfra_generator_backend_nginx:latest
     ports:
-      - '8080:8080'
+      - 80
+    depends_on:
+      - microinfra_generator_backend
+    networks:
+      - web
+      - project
+    environment:
+      VIRTUAL_HOST: api.microinfra.justmark0.me
+      LETSENCRYPT_HOST: api.microinfra.justmark0.me
+      LETSENCRYPT_EMAIL: developer@justmark0.me
+
+  microinfra_generator_backend:
+    build: .
+#    ports:
+#      - '8085:8085'
+
+
+networks:
+  web: # external network for hostname access
+    external:
+      name: web
+  project: # internal network for project

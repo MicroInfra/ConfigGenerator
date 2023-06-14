@@ -33,7 +33,7 @@ class Exporter(BaseModel):
 class PrometheusSettings(BaseModel):
     username: str
     password: str
-    url: str = "http://localhost:9090"
+    url: str = "http://prometheus:9090"
     exporters: tp.List[Exporter]
 
     def __str__(self):
