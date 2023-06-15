@@ -47,14 +47,23 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Stop previous containers
-        run: docker-compose -p microinfra_generator_backend stop
+        run: docker stop microinfra_backend
+        continue-on-error: true
 
       - name: Remove old container
-        run: docker-compose -p microinfra_generator_backend rm -f
+        run: docker rm -f microinfra_backend
+        continue-on-error: true
 
-      - name: Build containers
-        run: docker build -t microinfra_generator_backend_nginx -f .deploy/nginx/Dockerfile .  &&
-          docker tag microinfra_generator_backend_nginx microinfra_generator_backend_nginx:latest
+      - name: Build new container
+        run: docker build -t microinfra_backend -f Dockerfile . &&
+          docker tag microinfra_backend microinfra_backend:latest
 
       - name: Run service
-        run: docker-compose -f docker-compose.yml -p microinfra_backend up -d --build
+        run: |
+          docker run --detach \
+          --name microinfra_backend \
+          --env "VIRTUAL_PORT=8085" \
+          --env "VIRTUAL_HOST=api.microinfra.justmark0.me" \
+          --env "LETSENCRYPT_HOST=api.microinfra.justmark0.me" \
+          --env "LETSENCRYPT_EMAIL=developer@justmark0.me" \
+          microinfra_backend:latest
