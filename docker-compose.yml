@@ -17,8 +17,10 @@ services:
 
   microinfra_generator_backend:
     build: .
-#    ports:
-#      - '8085:8085'
+    ports:
+      - 8085
+    networks:
+      - project
 
 
 networks:

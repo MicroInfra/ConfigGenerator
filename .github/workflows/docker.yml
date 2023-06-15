@@ -57,4 +57,4 @@ jobs:
           docker tag microinfra_generator_backend_nginx microinfra_generator_backend_nginx:latest
 
       - name: Run service
-        run: docker-compose -f docker-compose.yml -p microinfra_backend up -d
+        run: docker-compose -f docker-compose.yml -p microinfra_backend up -d --build
