@@ -1,4 +1,3 @@
-import glob
 import os
 import shutil
 from pathlib import Path
@@ -41,3 +40,24 @@ def mkdir(id: str, relative_folder_path: str, permissions=0o666):
     path = TMP_FILES_DIR + id + "/" + relative_folder_path
     os.mkdir(path)
     os.chmod(path, permissions)
+
+
+def config_exists(id: str) -> (bool, str):
+    path = TMP_FILES_DIR + id + ".zip"
+    if os.path.exists(path):
+        return True, path
+    return False, ""
+
+
+def archive_configuration(id: str):
+    path = TMP_FILES_DIR + id
+    shutil.make_archive(path, "zip", path)
+
+
+def delete_config_folder(id: str):
+    path = TMP_FILES_DIR + id
+    shutil.rmtree(path)
+
+
+def get_config_url(id: str) -> str:
+    return f"https://api.microinfra.justmark0.me/config/{id}"

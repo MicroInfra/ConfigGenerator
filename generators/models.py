@@ -85,10 +85,6 @@ class RequestConfig(BaseModel):
     prometheus: RequestPrometheusSettings | None = None
     proxy_manager: RequestProxyManagerSettings | None = None
     services: tp.List[Service] | None = None
-    enable_nginx_reverse_proxy: bool = Field(
-        default=False,
-        description="Learn more: https://hub.docker.com/r/jwilder/nginx-proxy",
-    )
 
 
 class Config(BaseModel):
@@ -98,7 +94,7 @@ class Config(BaseModel):
     proxy_manager: ProxyManagerSettings
     microinfra_exporter: MicroinfraExporterSettings
     services: tp.List[Service]
-    enable_nginx_reverse_proxy: bool
+    config_url: str
 
     def __str__(self):
         return (
@@ -106,6 +102,7 @@ class Config(BaseModel):
             + f"\nPrometheus:\n{str(self.prometheus)}"
             + f"\nGrafana:\n{str(self.grafana)}"
             + f"\n\nMicroinfra Exporter:\n{str(self.microinfra_exporter)}"
+            + f"\nDownload config:\n{self.config_url}"
         )
 
 
