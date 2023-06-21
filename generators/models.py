@@ -85,6 +85,7 @@ class RequestConfig(BaseModel):
     prometheus: RequestPrometheusSettings | None = None
     proxy_manager: RequestProxyManagerSettings | None = None
     services: tp.List[Service] | None = None
+    use_docker_network: bool | None = None
 
 
 class Config(BaseModel):
@@ -95,6 +96,7 @@ class Config(BaseModel):
     microinfra_exporter: MicroinfraExporterSettings
     services: tp.List[Service]
     config_url: str
+    use_docker_network: bool = False
 
     def __str__(self):
         return (

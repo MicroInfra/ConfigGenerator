@@ -50,6 +50,9 @@ async def create_config(
         print("Request is:", request)
 
     exporters: list = get_field(request, "prometheus.exporters") or []
+    exporters.append(
+        models.Exporter(name="microexporter", host_port="exporter:60123")
+    )
     id = uuid.uuid4().hex
     config = models.Config(
         id=id,
@@ -73,7 +76,10 @@ async def create_config(
         ),
         services=get_field(request, "services") or list(),
         config_url=utils.get_config_url(id),
+        use_docker_network=get_field(request, "use_docker_network") or False,
     )
+    config.use_docker_network = True
+
     generate_all(config=config)
 
     utils.archive_configuration(config.id)
@@ -88,7 +94,18 @@ def test_config_generate():
     global debug
     debug = True
     loop = asyncio.get_event_loop()
-    coroutine = create_config()
+    coroutine = create_config(
+        models.RequestConfig(
+            use_docker_network=True,
+            services=[
+                models.Service(
+                    name="dummy",
+                    url="http://host.docker.internal:80/",
+                    listen_port=81,
+                )
+            ],
+        )
+    )
     loop.run_until_complete(coroutine)
 
 

@@ -27,12 +27,12 @@ services:
     volumes:
       - ./proxy_manager/settings.json:/app/settings.json
     environment:
-      CHECK_AUTH: false
+      CHECK_AUTH: False
 
   proxymanager-front:
     image: justmark0/proxymanager-front:latest
     ports:
-      - "80:3000"
+      - "10000:3000"
     depends_on:
       - proxy-manager
 
@@ -45,3 +45,11 @@ services:
 
 volumes:
   grafana-data:
+
+{% if use_docker_network %}
+# external network for other containters to join, so they will be not available from web.
+networks:
+  default:
+    name: microinfra_net
+    external: true
+{% endif %}

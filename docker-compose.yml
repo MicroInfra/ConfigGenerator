@@ -13,6 +13,6 @@ services:
 
 
 networks:
-  web: # external network for hostname access
-    external:
-      name: web
+  default:
+    name: web
+    external: true

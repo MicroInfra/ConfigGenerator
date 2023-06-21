@@ -29,6 +29,8 @@ def generate(data: models.Config):
     # Predefine folder for data
     utils.mkdir(data.id, "grafana-data", permissions=0o777)
 
-    grafana_dashboards.generate(id=data.id, services=["test1", "test2"])
+    grafana_dashboards.generate(
+        id=data.id, services=[ser.name for ser in data.services]
+    )
     # content = utils.get_content("grafana/test.dashboard.json")
     # utils.save_config_file(data.id, "grafana/dashboards/test.json", content)
